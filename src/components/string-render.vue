@@ -13,7 +13,8 @@
 
 <script setup lang="ts">
 import { JSONSchema7 } from 'json-schema';
-import { PropType } from 'vue';
+import { PropType, watch } from 'vue';
+import { deepEqual } from './deep-equal';
 
 const model = defineModel<string>({ default: '' });
 
@@ -27,6 +28,12 @@ const props = defineProps({
     default: undefined
   }
 });
+
+watch(() => props.schema?.enum, (newValue, oldValue) => {
+  if (!deepEqual(newValue, oldValue)) {
+    model.value = '';
+  }
+}, { deep: true });
 </script>
 
 <style scoped>

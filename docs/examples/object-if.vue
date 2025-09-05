@@ -19,8 +19,7 @@ const schema = ref<JSONSchema7>({
       title: 'a'
     },
     b: {
-      type: 'string',
-      enum: ['d', 'e'],
+      type: 'null',
       title: 'b'
     }
   },
@@ -28,7 +27,14 @@ const schema = ref<JSONSchema7>({
     properties: { a: { const: 'a' } },
     required: ['a'] 
   },
-  then: { properties: { b: { enum: ['b', 'c'] } } }
+  then: {
+    properties: {
+      b: {
+        type: 'string',
+        enum: ['b', 'c'] 
+      } 
+    } 
+  }
 });
 </script>
 

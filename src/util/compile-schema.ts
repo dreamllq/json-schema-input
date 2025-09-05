@@ -17,16 +17,21 @@ export const compileIf = (schema: JSONSchema7, data: any): JSONSchema7 => {
 
   if (ifSchema) {
     let result = otherSchema;
-    const mergeSchema = merge({}, otherSchema, ifSchema);
-    if (validate(mergeSchema, data)) {
-      if (thenSchema) {
+    const mergeSchema1 = merge({}, otherSchema, ifSchema);
+    if (thenSchema) {
+      const mergeSchema = merge({}, otherSchema, ifSchema, thenSchema);
+      if (validate(mergeSchema, data) || validate(mergeSchema1, data)) {
         result = merge({}, otherSchema, thenSchema);
-      }      
-    } else {
-      if (elseSchema) {
-        result = merge({}, otherSchema, elseSchema);
+      } else {
+        if (elseSchema) {
+          const mergeSchema = merge({}, otherSchema, ifSchema, elseSchema);
+          if (validate(mergeSchema, data) || !validate(mergeSchema1, data)) {
+            result = merge({}, otherSchema, elseSchema);
+          }
+        }
       }
-    }
+    } 
+    
     return compileIf(result, data);
   }
   return otherSchema;

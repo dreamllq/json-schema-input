@@ -23,6 +23,7 @@ import NumberRender from './number-render.vue';
 import BoolRender from './bool-render.vue';
 import ObjectRender from './object-render/index.vue';
 import ArrayRender from './array-render/index.vue';
+import NullRender from './null-render.vue';
 import IntegerRender from './integer-render.vue';
 import InputLayout from './common/input-layout.vue';
 import { cloneDeep } from 'lodash';
@@ -111,7 +112,9 @@ const component = computed(() => {
       return ArrayRender;
     } else if (cSchema.value.type === 'integer') {
       return IntegerRender;
-    } 
+    } else if (cSchema.value.type === 'null') {
+      return NullRender;
+    }
   }
 
   return NotSupport;
