@@ -1,0 +1,13 @@
+<Demo c="any"/>
+<Demo c="string"/>
+<Demo c="number"/>
+<Demo c="boolean"/>
+<Demo c="integer"/>
+<Demo c="array"/>
+<Demo c="object"/>
+<Demo c="string-array"/>
+<Demo c="mix-array-additional-false"/>
+<Demo c="mix-array-additional-true"/>
+<Demo c="mix-object-additional-false"/>
+<Demo c="mix-object-additional-true"/>
+<Demo c="mix-object-additional-type"/>
