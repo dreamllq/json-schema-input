@@ -12,3 +12,6 @@
 <Demo c="mix-object-additional-true"/>
 <Demo c="mix-object-additional-type"/>
 <Demo c="object-if"/>
+<Demo c="object-one-of"/>
+<Demo c="object-any-of"/>
+<Demo c="object-all-of"/>

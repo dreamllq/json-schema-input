@@ -1,35 +1,15 @@
 <template>
-  <json-schema-one-of-render
-    v-if='schema && schema.oneOf'
-    v-model='model'
-    :schema='schema'
-    :render='render' />
-  <json-schema-any-of-render 
-    v-else-if='schema && schema.anyOf'
-    v-model='model'
-    :schema='schema'
-    :render='render' />
-  <json-schema-all-of-render 
-    v-else-if='schema && schema.allOf'
-    v-model='model'
-    :schema='schema'
-    :render='render' />
-  <json-schema-item-render
-    v-else
-    v-model='model'
-    :schema='schema'
-    :render='render' />
+  <template v-for='(item, index) in (schema?.allOf as JSONSchema7[])' :key='index'>
+    <json-schema-item-render v-model='model' :schema='mergeSchema(item)' :render='render' />
+  </template>
 </template>
 
 <script setup lang="ts">
+import { PropType, ref, watch } from 'vue';
 import JsonSchemaItemRender from './json-schema-item-render.vue';
-import { JSONSchema7 } from 'json-schema';
-import { computed, PropType, ref, watch } from 'vue';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import { deepEqual } from './deep-equal';
-import JsonSchemaOneOfRender from './json-schema-one-of-render.vue';
-import JsonSchemaAnyOfRender from './json-schema-any-of-render.vue';
-import JsonSchemaAllOfRender from './json-schema-all-of-render.vue';
+import { JSONSchema7 } from 'json-schema';
 
 const props = defineProps({
   schema: {
@@ -66,6 +46,16 @@ watch(() => props.modelValue, () => {
     model.value = cloneDeep(props.modelValue);
   }
 });
+
+const activeName = ref((props.schema!.allOf![0] as JSONSchema7).title);
+
+const mergeSchema = (schema: JSONSchema7) => { 
+  const { allOf, ...others } = props.schema!;
+  return merge({}, schema, others);
+};
+
+const onTabChange = () => {
+};
 </script>
 
 <style scoped>
