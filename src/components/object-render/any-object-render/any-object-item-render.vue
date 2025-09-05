@@ -1,22 +1,22 @@
 <template>
   <div>
-    <!-- <value-type-select v-model='valueType' style='width: 150px' /> -->
-    <form-item label='数据类型'>
+    <form-item v-if='!(schema && schema.type)' label='数据类型'>
       <div style='flex: 1'>
         <value-type-select v-model='valueType' :types='schema?[schema.type]:undefined' />
       </div>
     </form-item>
-    <object-item-render v-model='objectItem' :schema='schema' :render='render' />
+    <object-item-render v-model='objectItem' :schema='objectSchema' :render='render' />
   </div>
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, watch } from 'vue';
+import { computed, PropType, ref, watch } from 'vue';
 import ValueTypeSelect from '../../value-type-select.vue';
 import ObjectItemRender from '../object-item-render.vue';
 import { ValueType } from '../../type';
 import { JSONSchema7 } from 'json-schema';
 import FormItem from '../../common/form-item.vue';
+import { getDefaultValueByType } from '@/components/get-default-value-by-type';
 
 const props = defineProps({
   schema: {
@@ -58,19 +58,7 @@ watch(model, () => {
 }, { deep: true });
 
 watch(valueType, () => {
-  
-  if (valueType.value === 'object') {
-    objectItem.value.value = {};
-  } else if (valueType.value === 'array') {
-    objectItem.value.value = [];
-  } else if (valueType.value === 'boolean') {
-    objectItem.value.value = false;
-  } else if (valueType.value === 'number') {
-    objectItem.value.value = 0;
-  } else if (valueType.value === 'string') {
-    objectItem.value.value = '';
-  }
-
+  objectItem.value.value = getDefaultValueByType(valueType.value);
   model.value.valueType = valueType.value;
   emits('update:modelValue', model.value);
 });
@@ -81,6 +69,17 @@ watch(objectItem, () => {
   emits('update:modelValue', model.value);
   
 }, { deep: true });
+
+const objectSchema = computed<JSONSchema7>(() => {
+  if (props.schema) {
+    return props.schema;
+  }
+
+  return {
+    type: valueType.value,
+    additionalProperties: true
+  };
+});
 
 </script>
 

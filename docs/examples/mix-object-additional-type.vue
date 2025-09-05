@@ -20,7 +20,7 @@ const schema = ref<JSONSchema7>({
         title: '姓名' 
       } 
     },
-    additionalProperties: false
+    additionalProperties: true
   },
   properties: {
     name: {
