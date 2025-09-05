@@ -4,10 +4,9 @@
       :is='component'
       v-if='component'
       v-model='model'
-      :schema='schema' 
+      :schema='cSchema' 
       :render='render' 
-      v-bind='xProps' 
-      @update:model-value='onUpdateModelValue' />
+      v-bind='xProps' />
     <template v-if='schema?.description' #description>
       {{ schema?.description }}
     </template>
@@ -16,7 +15,7 @@
 
 <script setup lang="ts">
 import { JSONSchema7 } from 'json-schema';
-import { computed, PropType, ref } from 'vue';
+import { computed, PropType, ref, watch } from 'vue';
 import NotSupport from './not-support.vue';
 import AnyRender from './any-render.vue';
 import StringRender from './string-render.vue';
@@ -26,9 +25,9 @@ import ObjectRender from './object-render/index.vue';
 import ArrayRender from './array-render/index.vue';
 import IntegerRender from './integer-render.vue';
 import InputLayout from './common/input-layout.vue';
-
-const model = defineModel<any>({ default: undefined });
-const xProps = computed(() => (props.schema?.['x-props'] as Record<string, any>) ?? {});
+import { cloneDeep } from 'lodash';
+import { deepEqual } from './deep-equal';
+import { compileIf, compileSchema } from '@/util/compile-schema';
 
 const props = defineProps({
   schema: {
@@ -38,59 +37,84 @@ const props = defineProps({
   render: {
     type: Object,
     default: undefined
+  },
+  modelValue: {
+    type: [
+      String,
+      Number,
+      Boolean,
+      Array,
+      Object
+    ],
+    default: undefined
+  }
+});
+const emits = defineEmits(['update:modelValue']);
+
+const model = ref(cloneDeep(props.modelValue));
+const cSchema = ref(props.schema ? compileIf(props.schema, model.value) : undefined);
+const xProps = computed(() => (cSchema.value?.['x-props'] as Record<string, any>) ?? {});
+
+watch(model, () => {
+  if (!deepEqual(model.value, props.modelValue)) {
+    emits('update:modelValue', cloneDeep(model.value));
   }
 });
 
-const onUpdateModelValue = (val) => {
-  // console.log(val);
-  
-};
+watch(() => props.modelValue, () => {
+  if (!deepEqual(model.value, props.modelValue)) {
+    model.value = cloneDeep(props.modelValue);
+  }
+});
+
+watch(() => props.schema, () => {
+  cSchema.value = props.schema ? compileIf(props.schema, model.value) : undefined;
+});
+
+watch(model, () => {
+  cSchema.value = props.schema ? compileIf(props.schema, model.value) : undefined;
+});
 
 const component = computed(() => {
-  if (!props.schema) {
+  if (!cSchema.value) {
     return AnyRender;
   }
 
-  if (props.schema['x-component']) {
+  if (cSchema.value['x-component']) {
     if (props.render) {
-      const com = props.render[props.schema['x-component']];
+      const com = props.render[cSchema.value['x-component']];
       if (!com) {
-        console.error(`render中不存在 ${props.schema['x-component']}`);
+        console.error(`render中不存在 ${cSchema.value['x-component']}`);
         console.log(props.render);
         return NotSupport;
       } else {
         return com;
       }
     } else {
-      console.error(`render中不存在 ${props.schema['x-component']}`);
+      console.error(`render中不存在 ${cSchema.value['x-component']}`);
       console.log(props.render);
       return NotSupport;
     }
 
   }
 
-  if (props.schema.type) {
-    if (props.schema.type === 'string') {
+  if (cSchema.value.type) {
+    if (cSchema.value.type === 'string') {
       return StringRender;
-    } else if (props.schema.type === 'number') {
+    } else if (cSchema.value.type === 'number') {
       return NumberRender;
-    } else if (props.schema.type === 'boolean') {
+    } else if (cSchema.value.type === 'boolean') {
       return BoolRender;
-    } else if (props.schema.type === 'object') {
+    } else if (cSchema.value.type === 'object') {
       return ObjectRender;
-    } else if (props.schema.type === 'array') {
+    } else if (cSchema.value.type === 'array') {
       return ArrayRender;
-    } else if (props.schema.type === 'integer') {
+    } else if (cSchema.value.type === 'integer') {
       return IntegerRender;
     } 
   }
 
-  if (Array.isArray(props.schema.oneOf) && props.schema.oneOf.length > 0) {
-    return AnyRender;
-  }
-
   return NotSupport;
-
 });
 
 </script>

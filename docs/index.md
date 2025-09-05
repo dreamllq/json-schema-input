@@ -11,3 +11,4 @@
 <Demo c="mix-object-additional-false"/>
 <Demo c="mix-object-additional-true"/>
 <Demo c="mix-object-additional-type"/>
+<Demo c="object-if"/>
